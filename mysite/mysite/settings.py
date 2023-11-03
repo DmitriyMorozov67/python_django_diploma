@@ -40,8 +40,8 @@ INSTALLED_APPS = [
 
     'frontend',
     'rest_framework',
-    'rest_framework.authtoken',
     'myauth.apps.MyauthConfig',
+    'shop.apps.ShopConfig',
 ]
 
 MIDDLEWARE = [
@@ -106,12 +106,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
 
     ]
 }
 
-AUTH_USER_MODEL = "myauth.CustomUser"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
