@@ -4,7 +4,7 @@ from catalog.models import Category
 
 def product_image_directory_path(instanse: 'ProductImage', filename: str) -> str:
     return 'products/images/{pk}/{filename}'.format(
-        pk=instanse.pk,
+        pk=instanse.product.pk,
         filename=filename
     )
 
