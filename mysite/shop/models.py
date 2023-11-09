@@ -1,58 +1,120 @@
 from django.db import models
+from catalog.models import Category
 
 
-def image_category_directory_path(instance: "Category", filename: str) -> str:
-    return "categories/category_{slug}/images/{filename}".format(
-        slug=instance.slug,
-        filename=filename,
+def product_image_directory_path(instanse: 'ProductImage', filename: str) -> str:
+    return 'products/images/{pk}/{filename}'.format(
+        pk=instanse.pk,
+        filename=filename
     )
 
-def image_product_directory_path(instance: "Product", filename: str) -> str:
-    return "products/product_{pk}/images/{filename}".format(
-        pk=instance.pk,
-        filename=filename,
-    )
 
-class Category(models.Model):
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200,
-                            unique=True)
-    image = models.ImageField(null=True,
-                              blank=True,
-                              upload_to=image_category_directory_path)
+class Product(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
+                                 null=True, blank=True,
+                                 related_name='products')
+    title = models.CharField(max_length=150, null=False, blank=False)
+    description = models.CharField(max_length=250, null=False, blank=True)
+    fullDescription = models.TextField(null=False, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                null=False)
+    count = models.IntegerField(default=0, null=False)
+    date = models.DateTimeField(auto_now_add=True, null=False)
+    freeDelivery= models.BooleanField(default=True)
+    limited = models.BooleanField(default=False)
+    rating = models.DecimalField(default=0, max_digits=3, decimal_places=2,
+                                 null=False)
+    active = models.BooleanField(default=False)
+
     class Meta:
-        ordering = ['-title']
-        indexes = [
-            models.Index(fields=['title'])
-        ]
-        verbose_name = 'category'
-        verbose_name_plural = 'categories'
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
+        ordering = ['pk', '-date']
 
     def __str__(self) -> str:
         return self.title
     
-class Product(models.Model):
-    category = models.ForeignKey(Category,
-                                 related_name='products',
-                                 on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
-    image = models.ImageField(null=True, blank=True,
-                              upload_to=image_product_directory_path)
-    description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=10,
-                                decimal_places=2)
-    count = models.PositiveIntegerField(verbose_name='count')
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    
+class ProductImage(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='images', verbose_name='product')
+    image = models.FileField(upload_to=product_image_directory_path)
+
+    class Meta:
+        verbose_name = 'Product image'
+        verbose_name_plural = 'Product images'
+        ordering = ['pk',]
+
+    def src(self):
+        return self.image
+
+    def __str__(self) -> str:
+        return self.name
+    
+    
+class ProductSpecification(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT,
+                                related_name='specifications')
+    name = models.CharField(max_length=250, default='')
+    value = models.CharField(max_length=250, default='')
+
+    class Meta:
+        verbose_name = 'Product specifications'
+        verbose_name_plural = 'Product specifications'
+
+class Tag(models.Model):
+    name = models.CharField(max_length=150, null=False, blank=True)
+    product = models.ManyToManyField(Product, related_name='tags',
+                                     verbose_name='product')
     
     class Meta:
-        ordering = ['name']
-        indexes = [
-            models.Index(fields=['id', 'slug']),
-            models.Index(fields=['name']),
-            models.Index(fields=['-created']),
-        ]
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+        ordering = ['pk',]
 
-        def __str__(self) -> str:
-            return self.name
+    def __str__(self) -> str:
+        return self.name
+    
+
+class Review(models.Model):
+    author = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    text = models.TextField
+    rate = models.PositiveSmallIntegerField(blank=False, default=5)
+    date = models.DateTimeField(auto_now_add=True)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT,
+                                related_name='reviews', verbose_name='product')
+    
+    class Meta:
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
+        ordering = ['pk',]
+
+    def __str__(self) -> str:
+        return f"{self.author}: {self.product.title}"
+    
+
+class Sale(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='sales')
+    salePrice = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                    db_index=True)
+    dateFrom = models.DateField(default='')
+    dateTo = models.DateField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Sale'
+        verbose_name_plural = 'Sales'
+
+    def price(self):
+        return self.product.price
+    
+    def title(self):
+        return self.product.title
+    
+    def href(self):
+        return f'/product/{self.product.pk}'
+    
+    def __str__(self) -> str:
+        return self.product.title
