@@ -2,10 +2,11 @@ from rest_framework import serializers
 from .models import Category, CategoryIcon
 
 
+
 class CategoryIconSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoryIcon
-        fields = ['id', 'src', 'alt']
+        fields = ['src', 'alt']
 
 
 class SubSerializer(serializers.ModelSerializer):
@@ -17,9 +18,10 @@ class SubSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    image= CategoryIconSerializer(many=False, required=False)
+    image = CategoryIconSerializer(many=False, required=False)
     subcategory = SubSerializer(many=True, required=False)
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'title', 'subcategory', 'image', 'favorite']
+

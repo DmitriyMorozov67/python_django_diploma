@@ -14,7 +14,8 @@ from .serializers import(
     ProductSerializer,
     SaleSerializer,
     TagsProductSerializer,
-    ReviewSerializer
+    ReviewSerializer,
+    LimitedProductSerializer,
 )
 
 
@@ -22,6 +23,7 @@ from .serializers import(
 class ProductDetail(APIView):
     def get(self, request: Request, pk):
         product = Product.objects.get(pk=pk)
+        print(product)
         serialized = ProductSerializer(product, many=False)
         return Response(serialized.data)
     
@@ -43,7 +45,7 @@ class TagsList(APIView):
 class LimitedList(APIView):
     def get(self, request: Request):
         products = Product.objects.filter(limited=True)
-        serialized = ProductSerializer(products, many=True)
+        serialized = LimitedProductSerializer(products, many=True)
         return Response(serialized.data)
     
 class PopularList(APIView):
@@ -52,7 +54,8 @@ class PopularList(APIView):
             active=True
             ).annotate(count_reviews=Count('reviews')
                        ).order_by('-count_reviews')[:8]
-        serialized = ProductSerializer(products, many=True)
+        serialized = LimitedProductSerializer(products, many=True)
+        print(products)
         return Response(serialized.data)
     
 

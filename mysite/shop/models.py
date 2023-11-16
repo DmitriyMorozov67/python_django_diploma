@@ -80,7 +80,7 @@ class Tag(models.Model):
 class Review(models.Model):
     author = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
-    text = models.TextField
+    text = models.TextField(default='')
     rate = models.PositiveSmallIntegerField(blank=False, default=5)
     date = models.DateTimeField(auto_now_add=True)
     product = models.ForeignKey(Product, on_delete=models.PROTECT,

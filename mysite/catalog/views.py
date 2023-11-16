@@ -43,7 +43,7 @@ def filter_catalog(request:Request):
     tags = request.query_params.getlist('tags[]')
     min_price = (request.query_params.get('filter[minPrice]'))
     max_price = (request.query_params.get('filter[maxPrice]'))
-    category=request.META['HTTP_REFERER'].split('/')[4]
+    category=request.META.get('HTTP_REFERER', '').split('/')
     print(category)
     
     catalog = Product.objects

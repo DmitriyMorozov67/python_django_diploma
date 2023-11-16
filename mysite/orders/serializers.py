@@ -14,8 +14,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['id', 'createdAt', 'fullName', 'email',
+                  'phone', 'deliveryType', 'paymentType',
+                  'totalCost', 'status', 'city', 'address',
+                  'products',
+                  ]
 
     def get_createdAt(self, instance):
-        date = instance.createdAt + datetime.timedelta(hourse=3)
+        date = instance.createdAt + datetime.timedelta(hours=3)
         return datetime.datetime.strftime(date, '%d.%m.%Y %H:%M')

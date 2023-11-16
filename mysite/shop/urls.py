@@ -16,4 +16,5 @@ urlpatterns = [
     path('api/products/popular', PopularList.as_view(), name='products_popular'),
     path('api/products/limited', LimitedList.as_view(), name='product_limited'),
     path('api/sales', SalesList.as_view(), name='sales'),
+
 ]

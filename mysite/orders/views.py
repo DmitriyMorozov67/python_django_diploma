@@ -32,16 +32,16 @@ class Orders(APIView):
         data = Order.objects.filter(
             user_id=request.user.profile.pk
         )
-        serializer = OrderSerializer(data, many=True)
-        return Response(serializer.data)
+        serialized = OrderSerializer(data, many=True)
+        return Response(serialized.data)
     
 
 class OrderDetail(APIView):
     def get(self, request: Request, pk):
         data = Order.objects.get(pk=pk)
-        serializer = OrderSerializer(data)
+        serialized = OrderSerializer(data)
         cart = Cart(request).cart
-        data = serializer.data
+        data = serialized.data
 
         try:
             products_in_order = data['products']
