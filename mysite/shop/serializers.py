@@ -1,5 +1,6 @@
 import datetime
 from rest_framework import serializers
+from rest_framework import pagination
 from .models import (
     Product,
     ProductSpecification,
@@ -123,3 +124,34 @@ class SaleSerializer(serializers.ModelSerializer):
         model = Sale
         fields = '__all__'
 
+
+class ProductCatalogSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
+    reviews = serializers.SerializerMethodField()
+    tags = TagsProductSerializer(many=True, required=False)
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, instance):
+        salePrice = instance.sales.first()
+        if salePrice:
+            instance.price = salePrice.salePrice
+            instance.save()
+            return salePrice.salePrice
+        return instance.price
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'category', 'price', 'count', 'date',
+                    'title', 'description', 'fullDescription',
+                    'freeDelivery', 'images', 'tags', 'reviews',
+                    'rating',
+                ]
+    
+    def get_reviews(self, obj):
+        reviews_count = Review.objects.count()
+        return reviews_count
+    
+
+class PaginatedProductSerializer(pagination.PageNumberPagination):
+    class Meta:
+        object_serializer_class = ProductCatalogSerializer

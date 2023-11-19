@@ -7,7 +7,7 @@ from .models import Category
 from .serializers import CategorySerializer
 
 from shop.models import Product
-from shop.serializers import ProductSerializer
+from shop.serializers import ProductSerializer, ProductCatalogSerializer
 
 
 def sort_products(request: Request, products):
@@ -96,7 +96,7 @@ class Catalog(APIView):
     def get(self, request: Request):
         products = filter_catalog(request)
         products = sort_products(request, products)
-        serialized = ProductSerializer(products, many=True)
+        serialized = ProductCatalogSerializer(products, many=True)
         return Response({'items': serialized.data})
     
 

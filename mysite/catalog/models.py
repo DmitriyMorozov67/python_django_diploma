@@ -19,7 +19,7 @@ class Category(models.Model):
     active = models.BooleanField(default=False)
     subcategory = models.ForeignKey('self', on_delete=models.PROTECT,
                                     blank=True, null=True,
-                                    related_name='subcategoryes')
+                                    related_name='subcategories')
     favorite = models.BooleanField(default=False)
 
     class Meta:
@@ -35,7 +35,7 @@ class Category(models.Model):
     
 
 class CategoryIcon(models.Model):
-    src = models.FileField(upload_to=icon_category_directory_path,
+    image = models.FileField(upload_to=icon_category_directory_path,
                            max_length=400)
     category = models.OneToOneField(Category, on_delete=models.CASCADE,
                                     related_name='icon', blank=True, null=True)
@@ -49,7 +49,7 @@ class CategoryIcon(models.Model):
         return self.category.title
     
     def href(self):
-        return self.src
+        return self.image
     
     def __str__(self):
         return 'icon of {title}'.format(title=self.category.title)
