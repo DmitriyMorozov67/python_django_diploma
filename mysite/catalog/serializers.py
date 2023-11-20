@@ -1,43 +1,37 @@
 from rest_framework import serializers
-from .models import Category, CategoryIcon
-from rest_framework import pagination
-
-
-
-
-class CategoryIconSerializer(serializers.ModelSerializer):
-    src = serializers.SerializerMethodField()
-    alt = serializers.CharField(default='pictures')
-    
-    class Meta:
-        model = CategoryIcon
-        fields = ['src', 'alt']
-    
-    def get_src(self, obj):
-        if obj.image:
-            return obj.image.url
-        return None  
+from .models import Category
 
 
 class SubSerializer(serializers.ModelSerializer):
-    image = CategoryIconSerializer(many=False, read_only=True)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
         fields = ['id', 'title', 'image']
 
+    def get_image(self, obj):
+        return {
+            'src': obj.image.url,
+            'alt': 'pictures',
+        }  
+    
+
 
 class CategorySerializer(serializers.ModelSerializer):
-    image = CategoryIconSerializer(many=False, required=False)
-    subcategories= SubSerializer(many=True, required=False)
-    # subcategories = serializers.SerializerMethodField()
+    subcategories = SubSerializer(many=True, required=False)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
         fields = ['id', 'title', 'image', 'subcategories']
 
-    # def get_subcategories(self, instance):
-    #     return Category.objects.get('subcategories').all()
+    def get_image(self, obj):
+        return {
+            'src': obj.image.url,
+            'alt': 'pictures',
+        }
+    
+
 
         
 

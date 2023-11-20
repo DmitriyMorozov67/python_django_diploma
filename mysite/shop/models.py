@@ -9,6 +9,8 @@ def product_image_directory_path(instanse: 'ProductImage', filename: str) -> str
     )
 
 
+
+
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  null=True, blank=True,
@@ -25,6 +27,7 @@ class Product(models.Model):
     rating = models.DecimalField(default=0, max_digits=3, decimal_places=2,
                                  null=False)
     active = models.BooleanField(default=False)
+    tags = models.ManyToManyField('Tag', blank=True, related_name='products')
 
     class Meta:
         verbose_name = 'Product'
@@ -33,8 +36,20 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=150, null=False, blank=True)
     
+    class Meta:
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+        ordering = ['pk',]
+
+    def __str__(self) -> str:
+        return self.name    
     
+
 class ProductImage(models.Model):
     name = models.CharField(max_length=200, null=False, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
@@ -62,19 +77,6 @@ class ProductSpecification(models.Model):
     class Meta:
         verbose_name = 'Product specifications'
         verbose_name_plural = 'Product specifications'
-
-class Tag(models.Model):
-    name = models.CharField(max_length=150, null=False, blank=True)
-    product = models.ManyToManyField(Product, related_name='tags',
-                                     verbose_name='product')
-    
-    class Meta:
-        verbose_name = 'Tag'
-        verbose_name_plural = 'Tags'
-        ordering = ['pk',]
-
-    def __str__(self) -> str:
-        return self.name
     
 
 class Review(models.Model):

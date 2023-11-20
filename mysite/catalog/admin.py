@@ -1,16 +1,10 @@
 from django.contrib import admin
-from .models import Category, CategoryIcon
+from .models import Category
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'title']
+    list_display = ['pk', 'title', 'image']
     list_display_links = ['pk', 'title']
     ordering = ['pk',]
 
-
-@admin.register(CategoryIcon)
-class CategoryIconAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'alt']
-    list_display_links = ['pk',]
-    ordering = ['pk',]

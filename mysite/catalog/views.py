@@ -2,6 +2,7 @@ from django.db.models import Count
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import pagination
 
 from .models import Category
 from .serializers import CategorySerializer
@@ -112,6 +113,18 @@ class BannerList(APIView):
 
 class CategoriesList(APIView):
     def get(self, request: Request):
-        categories = Category.objects.filter(subcategory=None)
+        categories = Category.objects.filter(parent=None)
         serialized = CategorySerializer(categories, many=True)
         return Response(serialized.data)
+    
+
+class CustomPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'results': data
+        })
