@@ -11,6 +11,19 @@ from shop.models import Product
 from shop.serializers import ProductSerializer, ProductCatalogSerializer
 
 
+class CustomPagination(pagination.PageNumberPagination):
+    page_size = 1
+    page_query_param = 'page'
+    page_size_query_param = 'per_page'
+    max_page_size = 100
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'items': data,
+            'current_page': self.page.number,
+            'last_page': self.page.paginator.num_pages,
+        })
+
 def sort_products(request: Request, products):
     sort = request.GET.get('sort')
     sortType = request.GET.get('sortType')
@@ -92,14 +105,30 @@ def filter_catalog(request:Request):
         catalog = catalog.filter(title__iregex=title, price__range=(min_price, max_price)).prefetch_related('images')
     
     return catalog
+    
+
+# class Catalog(APIView):
+#     def get(self, request: Request):
+#         products = filter_catalog(request)
+#         products = sort_products(request, products)
+#         serialized = ProductCatalogSerializer(products, many=True)
+#         return Response({'items': serialized.data})
+    
 
 class Catalog(APIView):
     def get(self, request: Request):
         products = filter_catalog(request)
         products = sort_products(request, products)
-        serialized = ProductCatalogSerializer(products, many=True)
-        return Response({'items': serialized.data})
-    
+        
+        paginator = CustomPagination()
+        if 'currentPage' in request.query_params and request.query_params['currentPage'] is not None:
+            paginated_products = paginator.paginate_queryset(products, request)
+        else:
+            paginated_products = products
+        
+        serialized = ProductCatalogSerializer(paginated_products, many=True)
+        return paginator.get_paginated_response(serialized.data)
+
 
 class BannerList(APIView):
     def get(self, request: Request):
@@ -117,14 +146,3 @@ class CategoriesList(APIView):
         serialized = CategorySerializer(categories, many=True)
         return Response(serialized.data)
     
-
-class CustomPagination(pagination.PageNumberPagination):
-    def get_paginated_response(self, data):
-        return Response({
-            'links': {
-                'next': self.get_next_link(),
-                'previous': self.get_previous_link()
-            },
-            'count': self.page.paginator.count,
-            'results': data
-        })
